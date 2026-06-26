@@ -45,6 +45,28 @@ $app->add(function (Request $request, $handler) {
 // ----------------------------------------------------------
 // Helper functions
 // ----------------------------------------------------------
+
+function validatePersonData($data, Response $response)
+{
+    if (!isset($data['name']) || trim($data['name']) === '') {
+        return jsonResponse($response, ["error" => "Name is required"], 400);
+    }
+
+    if (!isset($data['age']) || $data['age'] < 1 || $data['age'] > 120) {
+        return jsonResponse($response, ["error" => "Age must be between 1 and 120"], 400);
+    }
+
+    if (!isset($data['height']) || $data['height'] < 0.5 || $data['height'] > 2.5) {
+        return jsonResponse($response, ["error" => "Height must be between 0.5 and 2.5 meters"], 400);
+    }
+
+    if (!isset($data['weight']) || $data['weight'] < 2 || $data['weight'] > 300) {
+        return jsonResponse($response, ["error" => "Weight must be between 2 and 300 kg"], 400);
+    }
+
+    return null; // valid
+}
+
 function jsonResponse(Response $response, $data, int $status = 200): Response
 {
     $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
@@ -74,6 +96,17 @@ function getRequestData(Request $request): array
     }
 
     return is_array($data) ? $data : [];
+}
+
+function calculateBmi($height, $weight) {
+    return round($weight / ($height * $height), 2);
+}
+
+function getBmiCategory($bmi) {
+    if ($bmi < 18.5) return "Underweight";
+    if ($bmi < 25) return "Normal";
+    if ($bmi < 30) return "Overweight";
+    return "Obese";
 }
 
 // INSECURE: This is NOT a real JWT.
@@ -151,10 +184,15 @@ $app->post('/api/register', function (Request $request, Response $response) {
         $name = $data['name'] ?? '';
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         $role = $data['role'] ?? 'user';
 
-        $sql = "INSERT INTO users (name, email, password, password_hash, role)
-                VALUES ('$name', '$email', '$password', '$password', '$role')";
+        $stmt = $pdo->prepare(
+            "INSERT INTO users (name, email, password_hash, role)
+            VALUES (?, ?, ?, ?)"
+        );
+
+        $stmt->execute([$name, $email, $passwordHash, $role]);
 
         // INSECURE: direct SQL execution with user input.
         $pdo->exec($sql);
@@ -190,8 +228,9 @@ $app->post('/api/login', function (Request $request, Response $response) {
         // - Plain password check.
         // - No password_hash/password_verify.
         // Example test: email = ali@example.com' --
-        $sql = "SELECT * FROM users WHERE email = '$email' AND password = '$password' LIMIT 1";
-        $user = $pdo->query($sql)->fetch();
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
 
         if (!$user) {
             return jsonResponse($response, [
@@ -202,7 +241,11 @@ $app->post('/api/login', function (Request $request, Response $response) {
         }
 
         // INSECURE: fake unsigned token with no expiry.
-        $token = createFakeToken($user);
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            return jsonResponse($response, [
+                "error" => "Invalid email or password"
+            ], 401);
+        }
 
         return jsonResponse($response, [
             'message' => 'Login successful. This token is intentionally insecure.',
@@ -279,6 +322,8 @@ $app->post('/api/persons', function (Request $request, Response $response) {
         $pdo = getPDO();
         $data = getRequestData($request);
 
+        $validation = validatePersonData($data, $response);
+        if ($validation) return $validation;
         // INSECURE:
         // - No backend validation.
         // - Trusts user_id from frontend.
@@ -289,12 +334,16 @@ $app->post('/api/persons', function (Request $request, Response $response) {
         $age = $data['age'] ?? 0;
         $height = $data['height'] ?? 0;
         $weight = $data['weight'] ?? 0;
-        $bmi = $data['bmi'] ?? 0;
-        $category = $data['category'] ?? '';
+        $bmi = calculateBmi($height, $weight);
+        $category = getBmiCategory($bmi);
         $notes = $data['notes'] ?? '';
 
-        $sql = "INSERT INTO persons (user_id, name, age, height, weight, bmi, category, notes)
-                VALUES ($user_id, '$name', $age, $height, $weight, $bmi, '$category', '$notes')";
+        $stmt = $pdo->prepare(
+            "INSERT INTO persons (user_id, name, age, height, weight, bmi, category, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+
+        $stmt->execute([$user_id, $name, $age, $height, $weight, $bmi, $category, $notes]);
 
         $pdo->exec($sql);
         $id = $pdo->lastInsertId();
@@ -317,9 +366,9 @@ $app->get('/api/persons/{id}', function (Request $request, Response $response, a
         $pdo = getPDO();
         $id = $args['id'];
 
-        // TODO: Review whether this route should allow all users to access any record.
-        $sql = "SELECT * FROM persons WHERE id = $id";
-        $person = $pdo->query($sql)->fetch();
+        $stmt = $pdo->prepare("SELECT * FROM persons WHERE id = ?");
+        $stmt->execute([$id]);
+        $person = $stmt->fetch();
 
         if (!$person) {
             return jsonResponse($response, ['error' => 'Record not found'], 404);
@@ -399,8 +448,8 @@ $app->delete('/api/persons/{id}', function (Request $request, Response $response
         $id = $args['id'];
 
         // INSECURE: No auth, no ownership check, no role check.
-        $sql = "DELETE FROM persons WHERE id = $id";
-        $pdo->exec($sql);
+        $stmt = $pdo->prepare("DELETE FROM persons WHERE id = ?");
+        $stmt->execute([$id]);
 
         return jsonResponse($response, [
             'message' => 'BMI record deleted without role or ownership check.',
@@ -473,7 +522,7 @@ $app->get('/api/admin/users', function (Request $request, Response $response) {
         // INSECURE:
         // - No admin role check.
         // - SELECT * exposes password/password_hash.
-        $sql = "SELECT * FROM users ORDER BY id ASC";
+        $sql = "SELECT id, name, email, role FROM users ORDER BY id ASC";
         $users = $pdo->query($sql)->fetchAll();
 
         return jsonResponse($response, [
@@ -494,8 +543,8 @@ $app->put('/api/admin/users/{id}/role', function (Request $request, Response $re
         $role = $data['role'] ?? 'user';
 
         // INSECURE: No admin role check. Anyone can change any user role.
-        $sql = "UPDATE users SET role = '$role' WHERE id = $id";
-        $pdo->exec($sql);
+        $stmt = $pdo->prepare("UPDATE users SET role = ? WHERE id = ?");
+        $stmt->execute([$role, $id]);
 
         $user = $pdo->query("SELECT * FROM users WHERE id = $id")->fetch();
 
