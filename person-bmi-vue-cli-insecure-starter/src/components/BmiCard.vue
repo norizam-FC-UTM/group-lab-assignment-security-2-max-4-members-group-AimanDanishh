@@ -8,14 +8,10 @@
     <p><strong>BMI:</strong> {{ person.bmi }}</p>
     <p><strong>Category:</strong> {{ person.category }}</p>
 
-    <div class="notice danger">
-      <strong>Notes rendered with v-html intentionally:</strong>
-      <!-- INSECURE: v-html can execute user-controlled HTML/script-like payloads. -->
-       <!-- Investigation question:
-     This renders notes as HTML.
-     What happens if notes contains an XSS payload? -->
-      <div v-html="person.notes"></div> 
-      // i.e safer to use <p>{{ person.notes }}</p>
+    <div class="notice">
+      <strong>Notes:</strong>
+      <!-- ✅ FIX 11: Frontend XSS Prevention -->
+      <p>{{ person.notes }}</p>
     </div>
 
     <div class="actions">

@@ -11,33 +11,33 @@ ALTER TABLE persons AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 -- ==========================================================
 -- Seed users table
--- Passwords are intentionally stored as plain text for the
--- insecure starter lab.
+-- All seed users use password123.
+-- The password is stored as a bcrypt hash, not plain text.
 -- ==========================================================
 
-INSERT INTO users (name, email, password, password_hash, role) VALUES
-('Muhammad Aiman Hakimi', 'aiman@student.utm.my', 'password123', 'password123', 'user'),
-('Nur Aisyah Zulkifli', 'aisyah@student.utm.my', 'password123', 'password123', 'user'),
-('Ahmad Farhan Roslan', 'farhan@student.utm.my', 'password123', 'password123', 'user'),
-('Siti Nur Balqis Ismail', 'balqis@student.utm.my', 'password123', 'password123', 'user'),
-('Muhammad Danish Azman', 'danish@student.utm.my', 'password123', 'password123', 'user'),
-('Nur Imanina Hassan', 'imanina@student.utm.my', 'password123', 'password123', 'user'),
-('Amirul Hakim Rahman', 'amirul@student.utm.my', 'password123', 'password123', 'user'),
-('Farah Nadhirah Yusof', 'farah@student.utm.my', 'password123', 'password123', 'user'),
-('Haziq Irfan Abdullah', 'haziq@student.utm.my', 'password123', 'password123', 'user'),
-('Nurul Syafiqah Kamarudin', 'syafiqah@student.utm.my', 'password123', 'password123', 'user'),
-('Mohd Hafiz Jamal', 'hafiz@google.com', 'password123', 'password123', 'user'),
-('Nadia Sofea Ramli', 'nadia@google.com', 'password123', 'password123', 'user'),
-('Fikri Hazim Othman', 'fikri@google.com', 'password123', 'password123', 'user'),
-('Puteri Amira Shafie', 'amira@google.com', 'password123', 'password123', 'user'),
+INSERT INTO users (name, email, password_hash, role) VALUES
+('Muhammad Aiman Hakimi', 'aiman@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Nur Aisyah Zulkifli', 'aisyah@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Ahmad Farhan Roslan', 'farhan@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Siti Nur Balqis Ismail', 'balqis@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Muhammad Danish Azman', 'danish@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Nur Imanina Hassan', 'imanina@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Amirul Hakim Rahman', 'amirul@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Farah Nadhirah Yusof', 'farah@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Haziq Irfan Abdullah', 'haziq@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Nurul Syafiqah Kamarudin', 'syafiqah@student.utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Mohd Hafiz Jamal', 'hafiz@google.com', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Nadia Sofea Ramli', 'nadia@google.com', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Fikri Hazim Othman', 'fikri@google.com', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
+('Puteri Amira Shafie', 'amira@google.com', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'user'),
 
-('Siti Hajar Ibrahim', 'siti.hajar@utm.my', 'password123', 'password123', 'staff'),
-('Faizal Zainuddin', 'faizal.zainuddin@utm.my', 'password123', 'password123', 'staff'),
-('Noraini Salleh', 'noraini.salleh@utm.my', 'password123', 'password123', 'staff'),
-('Khairul Anwar Musa', 'khairul.anwar@utm.my', 'password123', 'password123', 'staff'),
+('Siti Hajar Ibrahim', 'siti.hajar@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'staff'),
+('Faizal Zainuddin', 'faizal.zainuddin@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'staff'),
+('Noraini Salleh', 'noraini.salleh@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'staff'),
+('Khairul Anwar Musa', 'khairul.anwar@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'staff'),
 
-('Amran Hamid', 'amran.hamid@utm.my', 'password123', 'password123', 'admin'),
-('Mazlina Ahmad', 'mazlina.ahmad@utm.my', 'password123', 'password123', 'admin');
+('Amran Hamid', 'amran.hamid@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'admin'),
+('Mazlina Ahmad', 'mazlina.ahmad@utm.my', '$2y$10$PKVCSQbei.4GkYfogo2v3eryikvvCJmvOSShLhiqLi/Wex0G3sYQC', 'admin');
 
 
 -- ==========================================================
